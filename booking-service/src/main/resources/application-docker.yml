@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/bookingdb
+  
+  kafka:
+    bootstrap-servers: kafka:9092
+  
+  data:
+    redis:
+      host: redis
+      port: 6379
+
+# Трассировка для Zipkin
+management:
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+  tracing:
+    sampling:
+      probability: 1.0
+
