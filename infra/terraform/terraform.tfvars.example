@@ -1,0 +1,21 @@
+# Yandex Cloud Configuration
+yandex_cloud_token  = "YOUR_YANDEX_CLOUD_OAUTH_TOKEN"
+yandex_cloud_id     = "YOUR_CLOUD_ID"
+yandex_folder_id    = "YOUR_FOLDER_ID"
+yandex_zone         = "ru-central1-a"
+
+# Kubernetes Configuration
+kubernetes_version = "1.28"
+environment        = "PRODUCTION"
+
+# Database Configuration
+db_username = "travelmaster_user"
+db_password = "CHANGE_ME_IN_PRODUCTION"
+
+# Domain Configuration
+domain_name = "travelmaster.example.com"
+
+# Backup Configuration
+enable_backup           = true
+backup_retention_days   = 7
+
