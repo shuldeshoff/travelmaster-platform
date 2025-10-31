@@ -222,17 +222,37 @@ helm install travelmaster ./helm/travelmaster -f helm/travelmaster/values-prod.y
 
 ## 📋 TODO / Roadmap
 
+### Фаза 0: Инфраструктура ✅
 - [x] Базовая структура проекта
-- [x] План реализации
-- [ ] Gateway Service
-- [ ] User Service
-- [ ] Trip Service
-- [ ] Booking Service
-- [ ] Payment Service
-- [ ] Notification Service
-- [ ] Analytics Service
-- [ ] Kubernetes деплой
-- [ ] CI/CD pipeline
+- [x] План реализации  
+- [x] Docker Compose setup
+- [x] Kubernetes манифесты и Helm charts
+- [x] CI/CD pipeline (GitHub Actions)
+- [x] Документация
+
+### Фаза 1: Базовые сервисы ✅
+- [x] Common Library (DTO, exceptions, utilities)
+- [x] **Gateway Service** ✨
+  - [x] Spring Cloud Gateway routing
+  - [x] JWT authentication filter
+  - [x] Rate limiting с Redis
+  - [x] CORS configuration
+  - [x] Global exception handler
+- [x] **User Service** ✨
+  - [x] User & Role entities + repositories
+  - [x] Flyway database migrations
+  - [x] JWT token generation
+  - [x] Registration & Login
+  - [x] RBAC (TRAVELER, AGENT, ADMIN)
+  - [x] Unit & Integration tests
+- [x] Dockerfiles для сервисов
+
+### Фаза 2: Бизнес-логика ⏳
+- [ ] Trip Service (поиск и управление поездками)
+- [ ] Booking Service (бронирования + Saga Pattern)
+- [ ] Payment Service (платежи + PCI DSS)
+- [ ] Notification Service (email/SMS/push)
+- [ ] Analytics Service (статистика и отчёты)
 
 Подробный roadmap: [IMPLEMENTATION_PLAN.md](docs/IMPLEMENTATION_PLAN.md)
 
