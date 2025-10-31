@@ -1,0 +1,39 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/your-org/travelmaster-config
+          # For local development, use native profile
+          # clone-on-start: true
+          default-label: main
+        # Encrypt sensitive properties
+        encrypt:
+          enabled: true
+  
+  security:
+    user:
+      name: config-admin
+      password: ${CONFIG_SERVER_PASSWORD:change-me-in-production}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    root: INFO
+    com.travelmaster: DEBUG
+    org.springframework.cloud.config: DEBUG
+

@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: native # Use native profile for local development
+  
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config
+
+# Encryption key for properties
+encrypt:
+  key: ${ENCRYPT_KEY:my-secret-encryption-key-change-in-production}
+
