@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бронирование создано</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        .booking-details {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎉 Бронирование создано!</h1>
+    </div>
+    <div class="content">
+        <p>Здравствуйте, <span th:text="${userName}">Пользователь</span>!</p>
+        
+        <p>Ваше бронирование успешно создано. Пожалуйста, завершите оплату в течение 24 часов для подтверждения.</p>
+        
+        <div class="booking-details">
+            <h2>Детали бронирования</h2>
+            <div class="detail-row">
+                <strong>Номер бронирования:</strong>
+                <span th:text="${bookingReference}">TM-2025-001234</span>
+            </div>
+            <div class="detail-row">
+                <strong>Поездка:</strong>
+                <span th:text="${tripTitle}">Сочи на 7 дней</span>
+            </div>
+            <div class="detail-row">
+                <strong>Количество пассажиров:</strong>
+                <span th:text="${numberOfPassengers}">2</span>
+            </div>
+            <div class="detail-row">
+                <strong>Сумма:</strong>
+                <span th:text="${totalAmount} + ' ' + ${currency}">90 000 RUB</span>
+            </div>
+        </div>
+        
+        <center>
+            <a href="#" class="button" th:href="@{${paymentUrl}}">Перейти к оплате</a>
+        </center>
+        
+        <p>Если у вас есть вопросы, свяжитесь с нашей службой поддержки.</p>
+    </div>
+    <div class="footer">
+        <p>© 2025 TravelMaster. Все права защищены.</p>
+        <p>Это автоматическое письмо, пожалуйста, не отвечайте на него.</p>
+    </div>
+</body>
+</html>
+
