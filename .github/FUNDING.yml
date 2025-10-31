@@ -1,22 +1,27 @@
 # Поддержите проект TravelMaster Platform
 # Ваша поддержка помогает развивать open-source проекты
 
-# GitHub Sponsors
-# github: shuldeshoff
+# ⚠️ ВАЖНО ДЛЯ РФ:
+# GitHub Sponsors, PayPal, Stripe - НЕ работают в РФ с 2022 года
+# Используйте доступные альтернативы ниже
 
-# Buy Me a Coffee
-# buy_me_a_coffee: shuldeshoff
+# ✅ ДОСТУПНО В РФ:
 
-# Ko-fi
-# ko_fi: shuldeshoff
+# Пользовательские ссылки (самый гибкий вариант)
+custom: ["https://boosty.to/shuldeshoff", "https://www.donationalerts.com/r/shuldeshoff"]
 
-# Patreon
-# patreon: shuldeshoff
+# Альтернативные варианты (добавьте после настройки):
+# - Boosty (российский аналог Patreon): https://boosty.to/
+# - DonationAlerts: https://www.donationalerts.com/
+# - Donatty: https://donatty.com/
+# - ЮMoney (Яндекс.Деньги): https://yoomoney.ru/
+# - Telegram бот для донатов
+# - Прямой перевод на карту Сбербанка/Тинькофф
+# - Криптовалюты (BTC, USDT, ETH)
 
-# Open Collective
-# open_collective: travelmaster
-
-# Пользовательские ссылки для поддержки
-# custom: ["https://t.me/shuldeshoff", "https://www.paypal.me/shuldeshoff"]
-
-# Раскомментируйте нужные платформы после их настройки
+# ❌ НЕ ДОСТУПНО В РФ (закомментировано):
+# github: shuldeshoff                    # Не работает с российскими картами
+# buy_me_a_coffee: shuldeshoff           # Требует зарубежную карту
+# ko_fi: shuldeshoff                     # Требует зарубежную карту  
+# patreon: shuldeshoff                   # Работает с большими ограничениями
+# open_collective: travelmaster          # Не работает в РФ
