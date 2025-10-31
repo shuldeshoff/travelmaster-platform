@@ -1,0 +1,856 @@
+openapi: 3.0.3
+info:
+  title: TravelMaster Platform API
+  description: |
+    RESTful API для платформы бронирования и управления путешествиями TravelMaster.
+    
+    ## Аутентификация
+    
+    API использует JWT Bearer tokens для аутентификации:
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+    
+    ## Rate Limiting
+    
+    - 100 requests/minute для неавторизованных пользователей
+    - 1000 requests/minute для авторизованных пользователей
+    
+    ## Errors
+    
+    API возвращает стандартные HTTP status codes:
+    - 200: Success
+    - 201: Created
+    - 400: Bad Request
+    - 401: Unauthorized
+    - 403: Forbidden
+    - 404: Not Found
+    - 500: Internal Server Error
+    
+  version: 1.0.0
+  contact:
+    name: TravelMaster API Support
+    email: api@travelmaster.com
+    url: https://docs.travelmaster.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.travelmaster.com/v1
+    description: Production server
+  - url: https://staging-api.travelmaster.com/v1
+    description: Staging server
+  - url: http://localhost:8080/v1
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: Аутентификация и авторизация
+  - name: Users
+    description: Управление пользователями
+  - name: Trips
+    description: Поиск и управление поездками
+  - name: Bookings
+    description: Управление бронированиями
+  - name: Payments
+    description: Обработка платежей
+  - name: Analytics
+    description: Аналитика и отчёты
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Регистрация нового пользователя
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Пользователь уже существует
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Вход в систему
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Неверные credentials
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Обновление access token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Новый access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Невалидный refresh token
+
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Получить профиль текущего пользователя
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Профиль пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          description: Не авторизован
+
+    put:
+      tags:
+        - Users
+      summary: Обновить профиль
+      operationId: updateProfile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Профиль обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+    delete:
+      tags:
+        - Users
+      summary: Удалить аккаунт
+      operationId: deleteAccount
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Аккаунт удалён
+
+  /users/{userId}:
+    get:
+      tags:
+        - Users
+      summary: Получить пользователя по ID
+      operationId: getUserById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Данные пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: Пользователь не найден
+
+  /trips:
+    get:
+      tags:
+        - Trips
+      summary: Поиск поездок
+      operationId: searchTrips
+      parameters:
+        - name: origin
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Город отправления
+        - name: destination
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Город назначения
+        - name: departureDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: returnDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: passengers
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: Список найденных поездок
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trips:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TripResponse'
+                  total:
+                    type: integer
+
+    post:
+      tags:
+        - Trips
+      summary: Создать новую поездку (только AGENT/ADMIN)
+      operationId: createTrip
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTripRequest'
+      responses:
+        '201':
+          description: Поездка создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripResponse'
+
+  /trips/{tripId}:
+    get:
+      tags:
+        - Trips
+      summary: Получить детали поездки
+      operationId: getTripById
+      parameters:
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Детали поездки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripDetailResponse'
+
+  /bookings:
+    get:
+      tags:
+        - Bookings
+      summary: Получить список бронирований пользователя
+      operationId: getBookings
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, CONFIRMED, PAID, CANCELLED]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Список бронирований
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingListResponse'
+
+    post:
+      tags:
+        - Bookings
+      summary: Создать бронирование
+      operationId: createBooking
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+      responses:
+        '201':
+          description: Бронирование создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+
+  /bookings/{bookingId}:
+    get:
+      tags:
+        - Bookings
+      summary: Получить детали бронирования
+      operationId: getBookingById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Детали бронирования
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingDetailResponse'
+
+    delete:
+      tags:
+        - Bookings
+      summary: Отменить бронирование
+      operationId: cancelBooking
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Бронирование отменено
+
+  /payments:
+    post:
+      tags:
+        - Payments
+      summary: Обработать платёж
+      operationId: processPayment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '200':
+          description: Платёж обработан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+
+  /payments/{paymentId}:
+    get:
+      tags:
+        - Payments
+      summary: Получить статус платежа
+      operationId: getPaymentStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Статус платежа
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentStatusResponse'
+
+  /analytics/bookings:
+    get:
+      tags:
+        - Analytics
+      summary: Статистика по бронированиям
+      operationId: getBookingsAnalytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Аналитика по бронированиям
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingsAnalyticsResponse'
+
+  /analytics/revenue:
+    get:
+      tags:
+        - Analytics
+      summary: Статистика по доходам
+      operationId: getRevenueAnalytics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [DAY, WEEK, MONTH, YEAR]
+      responses:
+        '200':
+          description: Аналитика по доходам
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevenueAnalyticsResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phoneNumber:
+          type: string
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+          default: Bearer
+        expiresIn:
+          type: integer
+          description: Seconds until token expiration
+        user:
+          $ref: '#/components/schemas/UserResponse'
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phoneNumber:
+          type: string
+        role:
+          type: string
+          enum: [TRAVELER, AGENT, ADMIN]
+        createdAt:
+          type: string
+          format: date-time
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phoneNumber:
+          type: string
+
+    TripResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        origin:
+          type: string
+        destination:
+          type: string
+        departureDate:
+          type: string
+          format: date-time
+        returnDate:
+          type: string
+          format: date-time
+        price:
+          type: number
+          format: decimal
+        currency:
+          type: string
+          default: RUB
+        availableSeats:
+          type: integer
+
+    CreateTripRequest:
+      type: object
+      required:
+        - origin
+        - destination
+        - departureDate
+        - price
+      properties:
+        origin:
+          type: string
+        destination:
+          type: string
+        departureDate:
+          type: string
+          format: date-time
+        returnDate:
+          type: string
+          format: date-time
+        price:
+          type: number
+          format: decimal
+        totalSeats:
+          type: integer
+
+    TripDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/TripResponse'
+        - type: object
+          properties:
+            segments:
+              type: array
+              items:
+                $ref: '#/components/schemas/TripSegment'
+            description:
+              type: string
+            inclusions:
+              type: array
+              items:
+                type: string
+
+    TripSegment:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [FLIGHT, HOTEL, TRANSFER]
+        provider:
+          type: string
+        details:
+          type: object
+
+    CreateBookingRequest:
+      type: object
+      required:
+        - tripId
+        - passengers
+      properties:
+        tripId:
+          type: integer
+          format: int64
+        passengers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PassengerInfo'
+        specialRequests:
+          type: string
+
+    PassengerInfo:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - dateOfBirth
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        passportNumber:
+          type: string
+
+    BookingResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        tripId:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, PAID, CANCELLED]
+        totalAmount:
+          type: number
+          format: decimal
+        currency:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    BookingDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/BookingResponse'
+        - type: object
+          properties:
+            trip:
+              $ref: '#/components/schemas/TripResponse'
+            passengers:
+              type: array
+              items:
+                $ref: '#/components/schemas/PassengerInfo'
+            payment:
+              $ref: '#/components/schemas/PaymentStatusResponse'
+
+    BookingListResponse:
+      type: object
+      properties:
+        bookings:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookingResponse'
+        page:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+
+    PaymentRequest:
+      type: object
+      required:
+        - bookingId
+        - amount
+        - paymentMethodToken
+      properties:
+        bookingId:
+          type: integer
+          format: int64
+        amount:
+          type: number
+          format: decimal
+        currency:
+          type: string
+          default: RUB
+        paymentMethodToken:
+          type: string
+        idempotencyKey:
+          type: string
+
+    PaymentResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum: [PENDING, PROCESSING, COMPLETED, FAILED]
+        transactionId:
+          type: string
+        amount:
+          type: number
+          format: decimal
+        currency:
+          type: string
+
+    PaymentStatusResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        status:
+          type: string
+        transactionId:
+          type: string
+        amount:
+          type: number
+          format: decimal
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    BookingsAnalyticsResponse:
+      type: object
+      properties:
+        totalBookings:
+          type: integer
+        confirmedBookings:
+          type: integer
+        cancelledBookings:
+          type: integer
+        averageBookingValue:
+          type: number
+          format: decimal
+        conversionRate:
+          type: number
+          format: percentage
+
+    RevenueAnalyticsResponse:
+      type: object
+      properties:
+        period:
+          type: string
+        totalRevenue:
+          type: number
+          format: decimal
+        currency:
+          type: string
+        breakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              revenue:
+                type: number
+                format: decimal
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+
