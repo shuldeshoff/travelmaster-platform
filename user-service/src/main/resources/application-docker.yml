@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${SPRING_DATASOURCE_HOST:postgres}:${SPRING_DATASOURCE_PORT:5432}/${SPRING_DATASOURCE_DATABASE:travelmaster_user}
+    username: ${SPRING_DATASOURCE_USERNAME:travelmaster}
+    password: ${SPRING_DATASOURCE_PASSWORD:travelmaster_password}
+  
+logging:
+  level:
+    root: INFO
+    com.travelmaster: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: WARN
+
