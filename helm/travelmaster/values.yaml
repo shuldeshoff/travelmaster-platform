@@ -1,0 +1,141 @@
+# Default values for TravelMaster Platform
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/shuldeshoff/travelmaster-platform
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: api.travelmaster.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: travelmaster-tls
+      hosts:
+        - api.travelmaster.com
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Database configuration
+database:
+  host: postgres-service
+  port: 5432
+  username: travelmaster
+  passwordSecret: postgres-secret
+  passwordKey: password
+
+# Redis configuration
+redis:
+  host: redis-service
+  port: 6379
+
+# Kafka configuration
+kafka:
+  bootstrapServers: kafka-service:9092
+
+# Monitoring
+monitoring:
+  enabled: true
+  prometheus:
+    enabled: true
+  grafana:
+    enabled: true
+
+# Services configuration
+services:
+  gateway:
+    enabled: true
+    port: 8080
+    replicas: 2
+  
+  user:
+    enabled: true
+    port: 8081
+    replicas: 2
+    database: travelmaster_user
+  
+  trip:
+    enabled: true
+    port: 8082
+    replicas: 2
+    database: travelmaster_trip
+  
+  booking:
+    enabled: true
+    port: 8083
+    replicas: 3
+    database: travelmaster_booking
+  
+  payment:
+    enabled: true
+    port: 8084
+    replicas: 3
+    database: travelmaster_payment
+  
+  notification:
+    enabled: true
+    port: 8085
+    replicas: 2
+    database: travelmaster_notification
+  
+  analytics:
+    enabled: true
+    port: 8086
+    replicas: 2
+    database: travelmaster_analytics
+

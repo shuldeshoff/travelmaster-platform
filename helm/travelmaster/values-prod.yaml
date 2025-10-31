@@ -1,0 +1,63 @@
+# Production environment values
+
+replicaCount: 3
+
+image:
+  tag: "1.0.0"  # Используйте конкретную версию в продакшене
+
+ingress:
+  hosts:
+    - host: api.travelmaster.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: travelmaster-prod-tls
+      hosts:
+        - api.travelmaster.com
+
+resources:
+  limits:
+    cpu: 2000m
+    memory: 4Gi
+  requests:
+    cpu: 1000m
+    memory: 2Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 60
+  targetMemoryUtilizationPercentage: 70
+
+services:
+  gateway:
+    replicas: 3
+  user:
+    replicas: 3
+  trip:
+    replicas: 3
+  booking:
+    replicas: 5
+  payment:
+    replicas: 5
+  notification:
+    replicas: 3
+  analytics:
+    replicas: 2
+
+# Production database (managed service)
+database:
+  host: postgres.prod.travelmaster.com
+  port: 5432
+
+# Production Redis (managed service)
+redis:
+  host: redis.prod.travelmaster.com
+  port: 6379
+
+# Production Kafka (managed service)
+kafka:
+  bootstrapServers: kafka.prod.travelmaster.com:9092
+
