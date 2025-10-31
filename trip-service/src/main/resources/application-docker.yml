@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${SPRING_DATASOURCE_HOST:postgres}:${SPRING_DATASOURCE_PORT:5432}/${SPRING_DATASOURCE_DATABASE:travelmaster_trip}
+    username: ${SPRING_DATASOURCE_USERNAME:travelmaster}
+    password: ${SPRING_DATASOURCE_PASSWORD:travelmaster_password}
+  
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+
+logging:
+  level:
+    root: INFO
+    com.travelmaster: INFO
+
